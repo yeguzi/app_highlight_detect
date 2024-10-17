@@ -42,7 +42,8 @@ chaquopy {
             install("scipy")
             install ("librosa==0.9.2")
             install ("resampy==0.3.1")
-            install ("tensorflow==2.1.0")
+//            install ("tensorflow==2.1.0")
+            install ("tflite-runtime")
         }
     }
 

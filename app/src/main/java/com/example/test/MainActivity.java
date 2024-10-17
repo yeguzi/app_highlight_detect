@@ -3,13 +3,13 @@ package com.example.test;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -34,47 +33,28 @@ public class MainActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private SeekBar seekBar;
     private Handler handler = new Handler();
-    private Button button, applyButton, detectButton, playButton;
-    private TextView resultTextView, textViewTime, audioFileName, currentTimeAudio, timeAudio;
-    private String path = null;
+    private Button button, playButton;
+    private TextView resultTextView, audioFileName, currentTimeAudio, timeAudio;
+
     private Uri audioUri;
-    private boolean isFileSelected = false;
-    private int sampleRate = 22050;  // Tần số mẫu
-    private int nFFT = 2048;         // Kích thước FFT
-    private int hopLength = 512;     // Kích thước bước nhảy
-    private int nMels = 128;         // Số lượng bộ lọc Mel
+    private Activity activity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         button = findViewById(R.id.button);
-        applyButton = findViewById(R.id.apply);
-        detectButton = findViewById(R.id.dectect);
+        playButton = findViewById(R.id.play);
         seekBar = findViewById(R.id.seekBar);
         resultTextView = findViewById(R.id.result);
-        textViewTime = findViewById(R.id.textView);
         audioFileName = findViewById(R.id.audioFileName);
         currentTimeAudio = findViewById(R.id.curentTimeAudio);
         timeAudio = findViewById(R.id.timeAudio);
-        playButton = findViewById(R.id.play);
-        playButton.setBackgroundResource(R.drawable.baseline_play_arrow_24);
 
         button.setOnClickListener(v -> openFileChooser());
-        playButton.setOnClickListener(v -> {
-            if (mediaPlayer != null) {
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.pause();
-                    playButton.setBackgroundResource(R.drawable.baseline_play_arrow_24);
-                } else {
-                    mediaPlayer.start();
-                    playButton.setBackgroundResource(R.drawable.baseline_pause_24);
-                    updateSeekBar();
-                }
-            }
-        });
+        playButton.setOnClickListener(v -> togglePlay());
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -90,7 +70,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
+
+        activity = this;
     }
+
+    private void togglePlay() {
+        if (mediaPlayer != null) {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+                playButton.setBackgroundResource(R.drawable.baseline_play_arrow_24);
+            } else {
+                mediaPlayer.start();
+                playButton.setBackgroundResource(R.drawable.baseline_pause_24);
+                updateSeekBar();
+            }
+        }
+    }
+
     private Runnable updateSeekBarRunnable = new Runnable() {
         @Override
         public void run() {
@@ -106,131 +102,33 @@ public class MainActivity extends AppCompatActivity {
         handler.post(updateSeekBarRunnable);
     }
 
-
     private void openFileChooser() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("audio/*");
         startActivityForResult(intent, PICK_AUDIO_FILE);
-
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_AUDIO_FILE && resultCode == RESULT_OK) {
-            if (data != null) {
-                audioUri = data.getData();
-                isFileSelected = true;
-                displayFileName(audioUri);
-                playAudio(audioUri);
-                playButton.setBackgroundResource(R.drawable.baseline_pause_24);
-
-                String destinationPath = getFilesDir() + "/python/model/";
-                File destinationDir = new File(destinationPath);
-                if (!destinationDir.exists()) {
-                    destinationDir.mkdirs(); // Tạo thư mục nếu chưa tồn tại
-                }
-
-                try {
-                    // Đọc nội dung file audio thành mảng byte
-                    InputStream inputStream = getContentResolver().openInputStream(audioUri);
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[1024];
-                    int length;
-                    while ((length = inputStream.read(buffer)) != -1) {
-                        byteArrayOutputStream.write(buffer, 0, length);
-                    }
-                    byte[] fileBytes = byteArrayOutputStream.toByteArray();
-                    inputStream.close();
-                    byteArrayOutputStream.close();
-
-                    // Lưu file vào thư mục đã chỉ định
-                    String fileName = "temp1.wav"; // Tên file bạn muốn lưu
-                    File outputFile = new File(destinationDir, fileName);
-                    FileOutputStream fos = new FileOutputStream(outputFile);
-                    fos.write(fileBytes);
-                    fos.close();
-
-                    // Kiểm tra nếu file đã được lưu
-                    Log.d("FileSave", "File saved successfully: " + outputFile.getAbsolutePath());
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        Python py = Python.getInstance();
-                        PyObject pyf = py.getModule("test");
-
-                        // Gọi hàm Python `extract_tflite` và nhận kết quả sau khi đã xử lý
-                        PyObject result = pyf.callAttr("extract_tflite", "temp.wav", 30);
-
-                        // Lấy kết quả từ Python và xử lý trong Java
-                        List<PyObject> highlight = result.asList();
-                        int start = highlight.get(0).toInt();
-                        int end = highlight.get(1).toInt();
-
-                        Handler mainHandler = new Handler(Looper.getMainLooper());
-                        mainHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                // Cập nhật giao diện người dùng
-                                resultTextView.setText("Start : " + formatTime(start) + " - End : " + formatTime(end));
-                            }
-                        });
-
-                        Log.d("start", String.valueOf(start));
-                    }
-                }).start();
-
-            }
+        if (requestCode == PICK_AUDIO_FILE && resultCode == RESULT_OK && data != null) {
+            audioUri = data.getData();
+            displayFileName(audioUri);
+            playAudio(audioUri);
+            saveAudioFile(audioUri);
         }
     }
-
-    private String arrayToString(float[][] array) {
-        StringBuilder sb = new StringBuilder();
-        for (float[] row : array) {
-            for (float value : row) {
-                sb.append(String.format("%.2f", value)).append(" "); // Định dạng giá trị tới 2 chữ số thập phân
-            }
-            sb.append("\n"); // Thêm dòng mới cho mỗi hàng
-        }
-        return sb.toString();
-    }
-
-    // Phương thức chuyển đổi Uri thành đường dẫn file
-    private String getFilePathFromUri(Uri uri) {
-        File file = new File(getCacheDir(), "temp_audio_file.wav");
-        try (InputStream inputStream = getContentResolver().openInputStream(uri);
-             OutputStream outputStream = new FileOutputStream(file)) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return file.getPath();
-    }
-
 
     private void displayFileName(Uri audioUri) {
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         mmr.setDataSource(this, audioUri);
         String fileName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-        if (fileName == null) {
-            fileName = "Tên không xác định";
-        }
-        audioFileName.setText("Tên bài hát: " + fileName);
+        audioFileName.setText("Tên bài hát: " + (fileName != null ? fileName : "Tên không xác định"));
     }
 
     private String formatTime(int milliseconds) {
         long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds);
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds) -
-                TimeUnit.MINUTES.toSeconds(minutes);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds) - TimeUnit.MINUTES.toSeconds(minutes);
         return String.format("%02d:%02d", minutes, seconds);
     }
 
@@ -238,7 +136,6 @@ public class MainActivity extends AppCompatActivity {
         if (mediaPlayer != null) {
             mediaPlayer.release();
         }
-
         mediaPlayer = new MediaPlayer();
         try {
             mediaPlayer.setDataSource(this, audioUri);
@@ -252,6 +149,47 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    private void saveAudioFile(Uri audioUri) {
+        new Thread(() -> {
+            try (InputStream inputStream = getContentResolver().openInputStream(audioUri);
+                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inputStream.read(buffer)) != -1) {
+                    byteArrayOutputStream.write(buffer, 0, length);
+                }
+
+                byte[] audioBytes = byteArrayOutputStream.toByteArray();
+                Log.d("FileSave", "File read successfully");
+
+                // Gọi hàm Python và truyền mảng byte
+                callPythonFunction(audioBytes);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+
+    private void callPythonFunction(byte[] audioBytes) {
+        Python py = Python.getInstance();
+        PyObject pyf = py.getModule("test");
+
+        PyObject path = pyf.callAttr("process",audioBytes);
+        Log.d("Path ", path.toString());
+        PyObject result = pyf.callAttr("extract_tflite", path.toString(), 30);
+        List<PyObject> highlight = result.asList();
+
+        int start = highlight.get(0).toInt();
+        int end = highlight.get(1).toInt();
+        activity.runOnUiThread(() -> {
+            resultTextView.setText("Start : " + start + " - End : " + end);
+            Log.d("UI Update", "TextView updated with start: " + start + ", end: " + end);
+        });
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -261,5 +199,4 @@ public class MainActivity extends AppCompatActivity {
         }
         handler.removeCallbacks(updateSeekBarRunnable);
     }
-
 }
