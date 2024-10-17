@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 import librosa
 from os.path import join
+import os
 from java import jclass
 from os.path import join, dirname
 def chunk(incoming, n_chunk):
@@ -33,7 +34,7 @@ def positional_encoding(batch_size, n_pos, d_pos):
 
 def extract_tflite(f, length=30):
     model_path = join(dirname(__file__), "model", "music_highlighter.tflite")
-    f = join(dirname(__file__), "model", "Illenium.wav")
+    f = join(dirname(__file__), "/data/user/0/com.example.test/files/python/model/", "temp1.wav")
     # Tải mô hình TFLite
     interpreter = tf.lite.Interpreter(model_path=model_path)
     interpreter.allocate_tensors()

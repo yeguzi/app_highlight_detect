@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -122,16 +123,49 @@ public class MainActivity extends AppCompatActivity {
                 isFileSelected = true;
                 displayFileName(audioUri);
                 playAudio(audioUri);
-                displayFileName(audioUri);
                 playButton.setBackgroundResource(R.drawable.baseline_pause_24);
+
+                String destinationPath = getFilesDir() + "/python/model/";
+                File destinationDir = new File(destinationPath);
+                if (!destinationDir.exists()) {
+                    destinationDir.mkdirs(); // Tạo thư mục nếu chưa tồn tại
+                }
+
+                try {
+                    // Đọc nội dung file audio thành mảng byte
+                    InputStream inputStream = getContentResolver().openInputStream(audioUri);
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = inputStream.read(buffer)) != -1) {
+                        byteArrayOutputStream.write(buffer, 0, length);
+                    }
+                    byte[] fileBytes = byteArrayOutputStream.toByteArray();
+                    inputStream.close();
+                    byteArrayOutputStream.close();
+
+                    // Lưu file vào thư mục đã chỉ định
+                    String fileName = "temp1.wav"; // Tên file bạn muốn lưu
+                    File outputFile = new File(destinationDir, fileName);
+                    FileOutputStream fos = new FileOutputStream(outputFile);
+                    fos.write(fileBytes);
+                    fos.close();
+
+                    // Kiểm tra nếu file đã được lưu
+                    Log.d("FileSave", "File saved successfully: " + outputFile.getAbsolutePath());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+
                         Python py = Python.getInstance();
                         PyObject pyf = py.getModule("test");
 
-                        // Gọi hàm Python và nhận kết quả
-                        PyObject result = pyf.callAttr("extract_tflite", "null",30);
+                        // Gọi hàm Python `extract_tflite` và nhận kết quả sau khi đã xử lý
+                        PyObject result = pyf.callAttr("extract_tflite", "temp.wav", 30);
 
                         // Lấy kết quả từ Python và xử lý trong Java
                         List<PyObject> highlight = result.asList();
@@ -150,9 +184,11 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("start", String.valueOf(start));
                     }
                 }).start();
+
             }
         }
     }
+
     private String arrayToString(float[][] array) {
         StringBuilder sb = new StringBuilder();
         for (float[] row : array) {
