@@ -93,22 +93,18 @@ public class MainActivity extends AppCompatActivity {
     }
     private void updateIconPosition(int start,int id ) {
         int totalDurationInSeconds = mediaPlayer.getDuration()/ 1000;;
-        float seekBarWidth = seekBar.getWidth();
+        float seekBarWidth = seekBar.getWidth() - 2 * getResources().getDimensionPixelSize(R.dimen.seek_bar_padding);
         float ratio = (float) start / totalDurationInSeconds;
         float iconPosition = ratio * seekBarWidth;
-        int[] seekBarPosition = new int[2];
-        seekBar.getLocationOnScreen(seekBarPosition);
-        int seekBarStartX = seekBarPosition[0];
-        float iconPositionfix = iconPosition + seekBarStartX - (icon.getWidth() / 2);
 
         if(id == 1){
-            icon.setTranslationX(iconPositionfix);
+            icon.setTranslationX(iconPosition);
             icon.setVisibility(View.VISIBLE);
         }else if(id == 2){
-            icon2.setTranslationX(iconPositionfix);
+            icon2.setTranslationX(iconPosition);
             icon2.setVisibility(View.VISIBLE);
         }else if(id == 3){
-            icon3.setTranslationX(iconPositionfix);
+            icon3.setTranslationX(iconPosition);
             icon3.setVisibility(View.VISIBLE);
         }
     }
