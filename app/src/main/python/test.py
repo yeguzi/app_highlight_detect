@@ -1,9 +1,17 @@
 import numpy as np
 import librosa
-from os.path import join
-import os
 from os.path import join, dirname
-import tflite_runtime.interpreter as tflite  # Thay đổi import
+import os
+import tflite_runtime.interpreter as tflite  # Sử dụng tflite_runtime
+
+interpreter = None
+
+def load_model():
+    global interpreter
+    model_path = join(dirname(__file__), "model", "music_highlighter.tflite")
+    interpreter = tflite.Interpreter(model_path=model_path)
+    interpreter.allocate_tensors()
+    print("Model loaded successfully")
 
 def chunk(incoming, n_chunk):
     input_length = incoming.shape[1]
@@ -33,13 +41,11 @@ def positional_encoding(batch_size, n_pos, d_pos):
     position_enc = np.tile(position_enc, [batch_size, 1, 1])
     return position_enc
 
-def extract_tflite(f, length=30):
-    model_path = join(dirname(__file__), "model", "music_highlighter.tflite")
-    f = os.path.join(os.path.dirname(__file__), "model", "temp.wav")
+def extract_tflite(f, length=15):
+    if interpreter is None:
+        raise RuntimeError("Model is not loaded. Call load_model() first.")
 
-    # Tải mô hình TFLite
-    interpreter = tflite.Interpreter(model_path=model_path)  # Sử dụng tflite
-    interpreter.allocate_tensors()
+    f = os.path.join(os.path.dirname(__file__), "model", "temp.wav")
 
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
@@ -73,21 +79,37 @@ def extract_tflite(f, length=30):
     attn_score = attn_score / attn_score.max()
     attn_score = attn_score.cumsum()
     attn_score = np.append(attn_score[length], attn_score[length:] - attn_score[:-length])
-    index = np.argmax(attn_score)
-    highlight = [index, index + length]
+#     index = np.argmax(attn_score)
+#     highlight = [index, index + length]
+#     print(highlight)
+    sorted_indices = np.argsort(attn_score)[::-1]
+    predictions = []
+    used_indices = set()
+
+    for index in sorted_indices:
+        if len(predictions) == 3:
+            break
+
+        is_overlap = any(index < h_end and index + length > h_start for (h_start, h_end) in predictions)
+
+        if not is_overlap:
+             predictions.append([index, index + length])
+
+    highlight = [h_start for h_start, h_end in predictions]
     print(highlight)
     return highlight
 
 def process(content):
-    # content is a bytes-like object
+
     content = bytes(content)
 
-    model_dir = os.path.join(os.path.dirname(__file__), "model")  # Đường dẫn đến thư mục model
-    os.makedirs(model_dir, exist_ok=True)  # Tạo thư mục nếu chưa tồn tại
+    model_dir = os.path.join(os.path.dirname(__file__), "model")
+    os.makedirs(model_dir, exist_ok=True)
 
     filename = os.path.join(model_dir, "temp.wav")
 
     # Ghi nội dung vào tệp
     with open(filename, "wb") as temp_file:
         temp_file.write(content)
+
     return filename

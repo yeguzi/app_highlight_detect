@@ -1,137 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".MainActivity">
+    android:background="@color/background_color"
+    >
+    <FrameLayout
+        android:id="@+id/frame_thumbnails"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/rounded_background"
+        android:layout_marginTop="60dp"
+        >
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-medium"
-        android:text="Highlight music detect"
-        android:textSize="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.117" />
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="161dp"
-        android:layout_marginTop="108dp"
-        android:layout_marginEnd="160dp"
-        android:layout_marginBottom="465dp"
-        android:text="Chọn file âm thanh"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.506"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <SeekBar
-        android:id="@+id/seekBar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button"
-        app:layout_constraintVertical_bias="0.187" />
-
-    <Button
-        android:id="@+id/apply"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="276dp"
-        android:text="Apply"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.838" />
-
-    <TextView
-        android:id="@+id/result"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start : 0.00 - End : 0.00"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.151"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.835" />
-
-    <Button
-        android:id="@+id/dectect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Gợi ý."
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.517"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.729" />
+        <ImageView
+            android:id="@+id/thumbnail"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_thumbnail1" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/audioFileName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tên bài hát :"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button"
-        app:layout_constraintVertical_bias="0.065" />
-
-    <Button
-        android:id="@+id/play"
-        android:layout_width="60dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.045"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar"
-        app:layout_constraintVertical_bias="0.0" />
-
+        android:layout_below="@id/frame_thumbnails"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="30dp"
+        android:fontFamily="serif-monospace"
+        android:text="Name:"
+        android:textColor="@color/white"
+        android:textSize="15dp" />
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="80px"
+        android:layout_height="80px"
+        android:layout_below="@+id/frame_thumbnails"
+        android:src="@drawable/baseline_place_24"
+        android:layout_marginTop="150dp"
+        android:visibility="invisible"
+        />
+    <ImageView
+        android:id="@+id/icon_2"
+        android:layout_width="80px"
+        android:layout_height="80px"
+        android:layout_below="@+id/frame_thumbnails"
+        android:src="@drawable/baseline_place_24"
+        android:layout_marginTop="150dp"
+        android:visibility="invisible"
+        />
+    <ImageView
+        android:id="@+id/icon_3"
+        android:layout_width="80px"
+        android:layout_height="80px"
+        android:layout_below="@+id/frame_thumbnails"
+        android:src="@drawable/baseline_place_24"
+        android:layout_marginTop="150dp"
+        android:visibility="invisible"
+        />
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="1000px"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="180dp"
+        android:progressTint="#FFFFFF"
+        android:thumbTint="#FFFFFF"
+        android:layout_below="@+id/frame_thumbnails"
+        />
     <TextView
-        android:id="@+id/timeAudio"
-        android:layout_width="54dp"
-        android:layout_height="23dp"
-        android:text="0:00"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.91"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.471" />
-
-    <TextView
-        android:id="@+id/curentTimeAudio"
+        android:id="@+id/currentTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="24dp"
-        android:text="Curent time:"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/play"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar"
-        app:layout_constraintVertical_bias="0.0" />
+        android:text="0:00"
+        android:textColor="@color/white"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/seekBar"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="8dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/totalTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0:00"
+        android:textColor="@color/white"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/seekBar"
+        android:layout_marginEnd="50dp"
+        android:layout_marginTop="8dp" />
+    <Button
+        android:id="@+id/playPauseButton"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_below="@id/seekBar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/round_button"
+        />
+    <TextView
+        android:id="@+id/pick_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chọn bài hát"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="15dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:layout_below="@+id/playPauseButton"
+        />
+
+</RelativeLayout>
