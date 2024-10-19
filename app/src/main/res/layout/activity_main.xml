@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="30dp"
         android:background="@drawable/rounded_background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -45,7 +45,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="20dp"
+
         app:layout_constraintBottom_toTopOf="@id/playPauseButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -70,7 +71,7 @@
                 android:id="@+id/icon_2"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_marginStart="100dp"
+                android:layout_marginStart="0dp"
                 android:src="@drawable/baseline_place_24"
                 android:visibility="visible" />
 
@@ -78,7 +79,7 @@
                 android:id="@+id/icon_3"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_marginStart="300dp"
+                android:layout_marginStart="0dp"
                 android:src="@drawable/baseline_place_24"
                 android:visibility="visible" />
         </RelativeLayout>
@@ -88,10 +89,12 @@
             android:id="@+id/seekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingStart="@dimen/seek_bar_padding"
+            android:paddingEnd="@dimen/seek_bar_padding"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
             android:progressTint="#FFFFFF"
             android:thumbTint="#FFFFFF"
+            android:padding="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.533"
             app:layout_constraintStart_toStartOf="parent"
@@ -134,7 +137,7 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/baseline_play_arrow_24"
         app:layout_constraintBottom_toTopOf="@id/pick_file"
         app:layout_constraintEnd_toEndOf="parent"
@@ -145,7 +148,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="30dp"
         android:fontFamily="sans-serif-medium"
         android:text="Chọn bài hát"
         android:textSize="15sp"
